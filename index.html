@@ -1,0 +1,1142 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pets home — найдите своего друга</title>
+  <style>
+    :root {
+      --bg: #f7f5ed;
+      --card: #fffefa;
+      --ink: #252a28;
+      --muted: #71808a;
+      --green: #285d4b;
+      --pale: #dce9dc;
+      --line: #deded5;
+      --orange: #f47f4c;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    button, select { font: inherit; }
+    button { cursor: pointer; }
+
+    .wrap {
+      width: min(1280px, calc(100% - 48px));
+      margin: 0 auto;
+    }
+
+    .catalog {
+      padding: 64px 0 100px;
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--orange);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 30px;
+      height: 3px;
+      background: var(--orange);
+    }
+
+    .intro {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+      margin: 24px 0 62px;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(38px, 5vw, 56px);
+      font-weight: 400;
+      letter-spacing: -.045em;
+    }
+    .subtitle {
+      margin: 20px 0 0;
+      color: var(--muted);
+      font-size: 19px;
+      line-height: 1.5;
+    }
+    .waiting {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 184px;
+      padding: 24px;
+      border-radius: 24px;
+      background: var(--pale);
+      color: var(--green);
+    }
+    .waiting strong { font-size: 32px; }
+    .waiting span { line-height: 1.45; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 312px 1fr;
+      gap: 46px;
+      align-items: start;
+    }
+
+    .filters {
+      position: sticky;
+      top: 20px;
+      padding: 28px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--card);
+    }
+    .filter-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 24px;
+      margin-bottom: 26px;
+      border-bottom: 1px solid var(--line);
+    }
+    .filter-head h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+    .reset {
+      padding: 0;
+      border: 0;
+      background: none;
+      color: var(--orange);
+    }
+    .field { margin-bottom: 22px; }
+    .field label {
+      display: block;
+      margin-bottom: 12px;
+      font-size: 15px;
+      font-weight: 600;
+    }
+    select {
+      width: 100%;
+      padding: 15px 14px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: white;
+      color: var(--ink);
+      outline-color: var(--green);
+    }
+    .segmented {
+      display: flex;
+      gap: 4px;
+      padding: 5px;
+      border-radius: 13px;
+      background: #eeefe8;
+    }
+    .segmented button {
+      flex: 1;
+      padding: 12px 6px;
+      border: 0;
+      border-radius: 10px;
+      background: transparent;
+      color: #46515a;
+      font-size: 13px;
+    }
+    .segmented button.active {
+      background: white;
+      box-shadow: 0 2px 8px #18251c12;
+    }
+    .check {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 26px 0;
+      font-size: 15px;
+    }
+    .check input {
+      width: 19px;
+      height: 19px;
+      accent-color: var(--green);
+    }
+    .primary {
+      width: 100%;
+      padding: 18px;
+      border: 0;
+      border-radius: 17px;
+      background: var(--green);
+      color: white;
+      font-weight: 700;
+      box-shadow: 0 10px 22px #285d4b22;
+    }
+
+    .results-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 4px 0 40px;
+      color: var(--muted);
+    }
+    .results-top select {
+      width: auto;
+      padding: 8px 30px 8px 10px;
+      border: 0;
+      background: transparent;
+      color: var(--ink);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 24px;
+    }
+    .pet-card {
+      overflow: hidden;
+      border: 1px solid #ecebe4;
+      border-radius: 25px;
+      background: var(--card);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .pet-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 34px #26372b12;
+    }
+    .photo {
+      position: relative;
+      height: 300px;
+      background: #e8e5dc;
+    }
+    .photo img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+    .status {
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 30px;
+      background: #fffefaed;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .status::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #5c9a6c;
+    }
+    .pet-info { padding: 24px; }
+    .pet-title {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .pet-title h3 {
+      margin: 0;
+      font-size: 29px;
+      font-weight: 400;
+    }
+    .age { color: var(--muted); white-space: nowrap; }
+    .description {
+      margin: 14px 0 20px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 22px;
+    }
+    .tag {
+      padding: 10px 12px;
+      border-radius: 11px;
+      background: var(--pale);
+      color: var(--green);
+      font-size: 13px;
+    }
+    .details {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      padding: 17px 0 0;
+      border: 0;
+      border-top: 1px solid var(--line);
+      background: transparent;
+      color: var(--green);
+      text-align: left;
+      font-weight: 600;
+    }
+    .details span:last-child { font-size: 22px; }
+
+    .empty {
+      grid-column: 1 / -1;
+      padding: 50px 20px;
+      border: 1px dashed var(--line);
+      border-radius: 20px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    footer {
+      padding: 70px 0 24px;
+      background: #1e3b31;
+      color: #d7e0da;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 50px;
+      padding-bottom: 50px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: white;
+      font-weight: 700;
+    }
+    .brand-icon {
+      display: grid;
+      width: 48px;
+      height: 48px;
+      place-items: center;
+      border-radius: 15px;
+      background: #ffffff20;
+      font-size: 24px;
+    }
+    .brand em { color: var(--orange); font-style: normal; }
+    footer p { max-width: 390px; line-height: 1.6; }
+    footer h3 { margin: 4px 0 22px; color: white; font-size: 16px; }
+    footer a {
+      display: block;
+      margin: 0 0 16px;
+      color: #d7e0da;
+      text-decoration: none;
+    }
+    .copyright {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      padding-top: 24px;
+      border-top: 1px solid #ffffff25;
+      color: #aebfb5;
+      font-size: 14px;
+    }
+
+    dialog {
+      width: min(560px, calc(100% - 28px));
+      padding: 0;
+      border: 0;
+      border-radius: 24px;
+      background: var(--card);
+      color: var(--ink);
+      box-shadow: 0 24px 80px #0004;
+    }
+    dialog::backdrop { background: #17231f99; }
+    .modal-photo { width: 100%; height: 280px; object-fit: cover; }
+    .modal-content { padding: 28px; }
+    .modal-content h2 { margin: 0; font-size: 34px; font-weight: 400; }
+    .modal-content p { color: var(--muted); line-height: 1.6; }
+    .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
+    .modal-actions button { flex: 1; }
+    .secondary {
+      padding: 16px;
+      border: 1px solid var(--green);
+      border-radius: 15px;
+      background: transparent;
+      color: var(--green);
+    }
+
+    @media (max-width: 1050px) {
+      .layout { grid-template-columns: 270px 1fr; gap: 24px; }
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .photo { height: 260px; }
+    }
+    @media (max-width: 700px) {
+      .wrap { width: min(100% - 32px, 520px); }
+      .catalog { padding: 38px 0 64px; }
+      .intro { align-items: flex-start; flex-direction: column; margin-bottom: 36px; }
+      .waiting { min-width: 0; padding: 14px 18px; }
+      .layout { grid-template-columns: 1fr; }
+      .filters { position: static; }
+      .grid { grid-template-columns: 1fr; }
+      .photo { height: 320px; }
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+      .footer-about { grid-column: 1 / -1; }
+      .copyright { flex-direction: column; }
+    }
+    .top-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 35px;
+}
+
+.nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.nav-links a {
+  padding: 12px 18px;
+  border-radius: 14px;
+  color: var(--green);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  background: var(--pale);
+}
+
+.subpage {
+  display: none;
+  min-height: 65vh;
+  padding: 50px 0 100px;
+}
+
+.subpage.visible {
+  display: block;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 28px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--green);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.page-heading {
+  margin: 0 0 18px;
+  font-size: clamp(34px, 5vw, 54px);
+  font-weight: 400;
+  letter-spacing: -.04em;
+}
+
+.page-lead {
+  max-width: 700px;
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+/* Страница питомца */
+.pet-profile {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+  margin-top: 30px;
+}
+
+.profile-image {
+  width: 100%;
+  height: 560px;
+  object-fit: cover;
+  border-radius: 28px;
+  background: var(--pale);
+}
+
+.profile-content {
+  padding: 12px 0;
+}
+
+.profile-content h1 {
+  margin: 12px 0;
+}
+
+.profile-description {
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+.profile-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 28px 0;
+}
+
+.fact {
+  padding: 18px;
+  border-radius: 17px;
+  background: var(--card);
+  border: 1px solid var(--line);
+}
+
+.fact span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.fact strong {
+  color: var(--green);
+}
+
+.profile-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.profile-actions button {
+  flex: 1;
+  min-width: 180px;
+}
+
+.donation-hero {
+  padding: 45px;
+  border-radius: 30px;
+  background: var(--pale);
+}
+
+.donation-hero .page-lead {
+  color: #4c6255;
+}
+
+.donation-layout {
+  display: grid;
+  grid-template-columns: 1.2fr .8fr;
+  gap: 30px;
+  align-items: start;
+  margin-top: 35px;
+}
+
+.donation-card,
+.donation-info {
+  padding: 30px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: var(--card);
+}
+
+.donation-card h2,
+.donation-info h2 {
+  margin-top: 0;
+  font-size: 25px;
+  font-weight: 400;
+}
+
+.donation-card .field {
+  margin: 24px 0;
+}
+
+.donation-card input[type="number"],
+.donation-card input[type="text"],
+.donation-card input[type="email"] {
+  width: 100%;
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  font: inherit;
+  background: white;
+}
+
+.donation-card input:focus {
+  outline: 2px solid var(--green);
+}
+
+.amount-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.amount-option {
+  padding: 15px 8px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: white;
+  color: var(--green);
+  font-weight: 700;
+}
+
+.amount-option.active {
+  border-color: var(--green);
+  background: var(--pale);
+}
+
+.donation-info p,
+.donation-info li {
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.donation-info li {
+  margin-bottom: 12px;
+}
+
+.donation-note {
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.donation-success {
+  display: none;
+  margin-top: 20px;
+  padding: 18px;
+  border-radius: 14px;
+  background: var(--pale);
+  color: var(--green);
+  line-height: 1.6;
+}
+
+.donation-success.visible {
+  display: block;
+}
+
+@media (max-width: 700px) {
+  .top-nav {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .pet-profile,
+  .donation-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-image {
+    height: 350px;
+  }
+
+  .donation-hero {
+    padding: 25px;
+  }
+
+  .donation-card,
+  .donation-info {
+    padding: 22px;
+  }
+}
+  </style>
+</head>
+<body>
+  <main class="catalog">
+    <div class="wrap">
+  <nav class="top-nav">
+    <a class="brand" href="#catalog" style="text-decoration:none;color:var(--green)">
+      <span class="brand-icon" style="background:var(--pale)">🐾</span>
+      <span>Pets <em style="color:var(--orange)">home</em></span>
+    </a>
+
+    <div class="nav-links">
+      <a href="#catalog" data-page-link="catalog">Питомцы</a>
+      <a href="#donate" data-page-link="donate">Платежи / Помочь</a>
+    </div>
+  </nav>
+</div>
+    <div class="wrap">
+      <div class="eyebrow">Каталог</div>
+
+      <section class="intro">
+        <div>
+          <h1>Pets Home</h1>
+          <p class="subtitle">Познакомьтесь с теми, кто готов стать частью вашей семьи.</p>
+        </div>
+        <div class="waiting">
+          <strong id="waitingCount">4</strong>
+          <span>питомца<br>ждут дом</span>
+        </div>
+      </section>
+
+      <div class="layout">
+        <aside class="filters">
+          <div class="filter-head">
+            <h2>Фильтры</h2>
+            <button class="reset" id="reset">Сбросить</button>
+          </div>
+
+          <div class="field">
+            <label>Кого ищете</label>
+            <div class="segmented" id="kind">
+              <button class="active" data-value="Все">Все</button>
+              <button data-value="Собака">Собака</button>
+              <button data-value="Кошка">Кошка</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="gender">Пол</label>
+            <select id="gender">
+              <option value="Любой">Любой</option>
+              <option value="Девочка">Девочка</option>
+              <option value="Мальчик">Мальчик</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="age">Возраст</label>
+            <select id="age">
+              <option value="Любой">Любой</option>
+              <option value="young">До 2 лет</option>
+              <option value="adult">От 3 лет</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="size">Размер</label>
+            <select id="size">
+              <option value="Любой">Любой</option>
+              <option value="Маленький">Маленький</option>
+              <option value="Средний">Средний</option>
+              <option value="Большой">Большой</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="activity">Активность</label>
+            <select id="activity">
+              <option value="Любая">Любая</option>
+              <option value="Спокойная">Спокойная</option>
+              <option value="Активная">Активная</option>
+            </select>
+          </div>
+          <label class="check">
+            <input type="checkbox" id="sterilized" checked>
+            Только привитые
+          </label>
+          <button class="primary" id="apply">Показать питомцев</button>
+        </aside>
+
+        <section>
+          <div class="results-top">
+            <span>Найдено: <strong id="resultCount">4</strong></span>
+            <select id="sort" aria-label="Сортировка">
+              <option value="new">Сначала новые</option>
+              <option value="young">Сначала младше</option>
+              <option value="old">Сначала старше</option>
+            </select>
+          </div>
+          <div class="grid" id="petGrid"></div>
+        </section>
+      </div>
+    </div>
+  </main>
+<!-- Отдельная страница питомца -->
+<main id="petPage" class="subpage">
+  <div class="wrap">
+    <button class="back-link" id="backToCatalog">
+      ← Вернуться в каталог
+    </button>
+
+    <div id="petProfileContent"></div>
+  </div>
+</main>
+
+<!-- Демонстрационная страница платежей -->
+<main id="donatePage" class="subpage">
+  <div class="wrap">
+    <button class="back-link" id="backFromDonate">← Вернуться в каталог</button>
+
+    <section class="donation-hero">
+      <div class="eyebrow">Ваша помощь важна</div>
+      <h1 class="page-heading">Подарите заботу</h1>
+      <p class="page-lead">Даже небольшой вклад помогает питомцам получить корм, лечение и шанс найти любящую семью.</p>
+    </section>
+
+    <div class="donation-layout">
+      <section class="donation-card">
+        <h2>Демонстрация платежа</h2>
+        <p style="color:var(--muted);line-height:1.6">Выберите сумму и заполните тестовые данные. Реальное списание денег не производится.</p>
+        <form id="paymentForm">
+          <div class="field">
+            <label>Сумма пожертвования</label>
+            <div class="amount-options" id="amountOptions">
+              <button type="button" class="amount-option active" data-amount="5">50р</button>
+              <button type="button" class="amount-option" data-amount="15">100р</button>
+              <button type="button" class="amount-option" data-amount="30">1000р</button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="customAmount">Или укажите другую сумму (р)</label>
+            <input id="customAmount" type="number" min="1" max="10000" step="1" placeholder="Например, 20">
+          </div>
+          <div class="field">
+            <label for="donorName">Ваше имя</label>
+            <input id="donorName" type="text" autocomplete="name" placeholder="Как к вам обращаться" required>
+          </div>
+          <div class="field">
+            <label for="donorEmail">Электронная почта</label>
+            <input id="donorEmail" type="email" autocomplete="email" placeholder="you@example.com" required>
+          </div>
+          <div class="field">
+            <label for="paymentMethod">Способ оплаты</label>
+            <select id="paymentMethod">
+              <option value="card">Банковская карта </option>
+              <option value="bank">Банковский перевод </option>
+            </select>
+          </div>
+          <div id="cardFields">
+            <div class="field">
+              <label for="cardNumber">Номер карты </label>
+              <input id="cardNumber" type="text" inputmode="numeric" autocomplete="off" placeholder="4242 4242 4242 4242" maxlength="19">
+            </div>
+            <div class="profile-facts" style="margin:0 0 20px">
+              <div>
+                <label for="cardExpiry" style="display:block;margin-bottom:8px;font-weight:600">Срок действия</label>
+                <input id="cardExpiry" type="text" placeholder="MM/YY" maxlength="5" autocomplete="off">
+              </div>
+              <div>
+                <label for="cardCvc" style="display:block;margin-bottom:8px;font-weight:600">CVC</label>
+                <input id="cardCvc" type="password" inputmode="numeric" placeholder="123" maxlength="4" autocomplete="off">
+              </div>
+            </div>
+          </div>
+          <button class="primary" type="submit" id="payButton">Пожертвовать 100р</button>
+          <p class="donation-note">Это учебный макет интерфейса. Не вводите данные настоящей банковской карты: платёжная система не подключена, деньги не списываются.</p>
+          <div class="donation-success" id="paymentSuccess" role="status" aria-live="polite"></div>
+        </form>
+      </section>
+
+      <aside class="donation-info">
+        <h2>На что пойдут средства</h2>
+        <ul>
+          <li><strong>Корм и вода</strong> — ежедневная забота о каждом питомце.</li>
+          <li><strong>Ветеринарная помощь</strong> — осмотры, лекарства и восстановление.</li>
+          <li><strong>Безопасное место</strong> — чистые лежанки, тепло и спокойствие.</li>
+        </ul>
+        <div class="fact" style="margin-top:24px">
+          <span>Вы выбрали</span>
+          <strong id="donationSummary">100р на помощь питомцам</strong>
+        </div>
+      </aside>
+    </div>
+  </div>
+</main>
+  <footer>
+    <div class="wrap">
+      <div class="footer-grid">
+        <div class="footer-about">
+          <div class="brand">
+            <span class="brand-icon">🐾</span>
+            <span>Pets <em>home</em></span>
+          </div>
+          <p>Помогаем животным встретить своих людей и обрести дом.</p>
+        </div>
+        <div>
+          <h3>Навигация</h3>
+          <a href="#">Питомцы</a>
+          <a href="#">О приюте</a>
+          <a href="#">Как помочь</a>
+        </div>
+        <div>
+          <h3>Связаться</h3>
+          <a href="tel:+74951234567">+7 999 168 18 46</a>
+          <a href="mailto:hello@petshome.ru">diiinawx@gmail.com</a>
+          <a href="#">◎　➤</a>
+        </div>
+      </div>
+      <div class="copyright">
+        <span>© 2026 Pets home</span>
+        <span>Сыктывкар ул. Морозова 118</span>
+      </div>
+    </div>
+  </footer>
+
+  <dialog id="petDialog">
+    <img class="modal-photo" id="modalPhoto" alt="">
+    <div class="modal-content">
+      <h2 id="modalName"></h2>
+      <p id="modalDescription"></p>
+      <div class="modal-actions">
+        <button class="primary" id="adopt">Хочу забрать домой</button>
+        <button class="secondary" id="closeDialog">Закрыть</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script>
+    const pets = [
+      {
+        name: "Луна", kind: "Собака", age: 2, ageText: "2 года",
+        gender: "Девочка", size: "Средний", activity: "Спокойная",
+        description: "Нежная и любознательная",
+        full: "Луна любит долгие прогулки, спокойно ездит в машине и дружит с другими собаками. Дома ведёт себя деликатно, быстро учится и очень ценит внимание.",
+        vaccinated: true, image: "https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=900&q=85"
+      },
+      {
+        name: "Ричи", kind: "Собака", age: 3, ageText: "3 года",
+        gender: "Мальчик", size: "Большой", activity: "Активная",
+        description: "Добрый и активный",
+        full: "Ричи — дружелюбный пёс, который обожает прогулки и игры. Он хорошо ладит с людьми и станет отличным компаньоном для активной семьи.",
+        vaccinated: true, image: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=900&q=85"
+      },
+      {
+        name: "Мила", kind: "Кошка", age: 1, ageText: "1 год",
+        gender: "Девочка", size: "Маленький", activity: "Спокойная",
+        description: "Спокойная и ласковая",
+        full: "Мила — нежная кошка, которая любит уютные места и тихие вечера рядом с человеком. Любопытная, аккуратная и очень ласковая.",
+        vaccinated: true, image: "https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=900&q=85"
+      },
+      {
+        name: "Боня", kind: "Собака", age: 5, ageText: "5 лет",
+        gender: "Мальчик", size: "Средний", activity: "Спокойная",
+        description: "Преданный и умный",
+        full: "Боня — умный и преданный друг. Он уже знает домашние правила, любит спокойные прогулки и мечтает о своём человеке.",
+        vaccinated: true, image: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=900&q=85"
+      }
+    ];
+
+    const grid = document.querySelector("#petGrid");
+    const dialog = document.querySelector("#petDialog");
+    let selectedKind = "Все";
+
+    function render() {
+      const gender = document.querySelector("#gender").value;
+      const age = document.querySelector("#age").value;
+      const size = document.querySelector("#size").value;
+      const activity = document.querySelector("#activity").value;
+      const vaccinated = document.querySelector("#sterilized").checked;
+      const sort = document.querySelector("#sort").value;
+
+      let list = pets.filter(pet => {
+        return (selectedKind === "Все" || pet.kind === selectedKind)
+          && (gender === "Любой" || pet.gender === gender)
+          && (size === "Любой" || pet.size === size)
+          && (activity === "Любая" || pet.activity === activity)
+          && (!vaccinated || pet.vaccinated)
+          && (age === "Любой" || (age === "young" ? pet.age <= 2 : pet.age >= 3));
+      });
+
+      if (sort === "young") list.sort((a, b) => a.age - b.age);
+      if (sort === "old") list.sort((a, b) => b.age - a.age);
+
+      document.querySelector("#resultCount").textContent = list.length;
+      document.querySelector("#waitingCount").textContent = list.length;
+
+      if (!list.length) {
+        grid.innerHTML = '<div class="empty">По этим параметрам питомцев пока не найдено. Попробуйте изменить фильтры.</div>';
+        return;
+      }
+
+      grid.innerHTML = list.map(pet => `
+        <article class="pet-card">
+          <div class="photo">
+            <img src="${pet.image}" alt="Питомец ${pet.name}" loading="lazy">
+            <span class="status">Ищет дом</span>
+          </div>
+          <div class="pet-info">
+            <div class="pet-title">
+              <h3>${pet.name}</h3>
+              <span class="age">${pet.ageText}</span>
+            </div>
+            <p class="description">${pet.description}</p>
+            <div class="tags">
+              <span class="tag">${pet.gender}</span>
+              <span class="tag">${pet.size}</span>
+            </div>
+            <button class="details" data-name="${pet.name}">
+              <span>Подробнее</span><span>→</span>
+            </button>
+          </div>
+        </article>
+      `).join("");
+
+      grid.querySelectorAll(".details").forEach(button => {
+        button.addEventListener("click", () => openPet(button.dataset.name));
+      });
+    }
+
+    function showPage(page) {
+      document.querySelector(".catalog").style.display = page === "catalog" ? "block" : "none";
+      document.querySelector("#petPage").classList.toggle("visible", page === "pet");
+      document.querySelector("#donatePage").classList.toggle("visible", page === "donate");
+      document.querySelectorAll("[data-page-link]").forEach(link => {
+        link.classList.toggle("active", link.dataset.pageLink === page);
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function openPet(name) {
+      const pet = pets.find(item => item.name === name);
+      if (!pet) return;
+
+      document.querySelector("#petProfileContent").innerHTML = `
+        <div class="eyebrow">${pet.kind} · Ищет дом</div>
+        <div class="pet-profile">
+          <img class="profile-image" src="${pet.image}" alt="Фото питомца ${pet.name}">
+          <div class="profile-content">
+            <h1>${pet.name}</h1>
+            <p class="profile-description">${pet.full}</p>
+            <div class="profile-facts">
+              <div class="fact"><span>Возраст</span><strong>${pet.ageText}</strong></div>
+              <div class="fact"><span>Пол</span><strong>${pet.gender}</strong></div>
+              <div class="fact"><span>Размер</span><strong>${pet.size}</strong></div>
+              <div class="fact"><span>Активность</span><strong>${pet.activity}</strong></div>
+              <div class="fact"><span>Вакцинация</span><strong>${pet.vaccinated ? "Привит(а)" : "Не указана"}</strong></div>
+              <div class="fact"><span>Статус</span><strong>Ищет дом</strong></div>
+            </div>
+            <h2>О характере</h2>
+            <p class="profile-description">${pet.description}. Мы поможем познакомиться с питомцем и обсудить условия ответственного пристройства.</p>
+            <div class="profile-actions">
+              <button class="primary" id="profileAdopt">Хочу забрать домой</button>
+              <button class="secondary" id="profileDonate">Помочь приюту</button>
+            </div>
+          </div>
+        </div>`;
+
+      showPage("pet");
+      document.querySelector("#profileAdopt").addEventListener("click", () => {
+        alert(`Спасибо за интерес к питомцу ${pet.name}! Чтобы обсудить знакомство и пристройство, позвоните: +7 999 168 18 46`);
+      });
+      document.querySelector("#profileDonate").addEventListener("click", () => {
+        showPage("donate");
+        location.hash = "donate";
+      });
+      history.replaceState(null, "", "#pet-" + encodeURIComponent(pet.name));
+    }
+
+    document.querySelectorAll("#kind button").forEach(button => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll("#kind button").forEach(item => item.classList.remove("active"));
+        button.classList.add("active");
+        selectedKind = button.dataset.value;
+        render();
+      });
+    });
+
+    ["gender", "age", "size", "activity", "sterilized", "sort"].forEach(id => {
+      document.querySelector(`#${id}`).addEventListener("change", render);
+    });
+
+    document.querySelector("#apply").addEventListener("click", render);
+    document.querySelector("#reset").addEventListener("click", () => {
+      selectedKind = "Все";
+      document.querySelectorAll("#kind button").forEach(button => {
+        button.classList.toggle("active", button.dataset.value === "Все");
+      });
+      document.querySelector("#gender").value = "Любой";
+      document.querySelector("#age").value = "Любой";
+      document.querySelector("#size").value = "Любой";
+      document.querySelector("#activity").value = "Любая";
+      document.querySelector("#sterilized").checked = false;
+      render();
+    });
+
+    document.querySelector("#closeDialog").addEventListener("click", () => dialog.close());
+    document.querySelector("#adopt").addEventListener("click", () => {
+      alert("Спасибо за интерес! Позвоните нам: +7 999 168 18 46");
+    });
+
+    document.querySelector("#backToCatalog").addEventListener("click", () => {
+      showPage("catalog");
+      history.replaceState(null, "", "#catalog");
+    });
+    document.querySelector("#backFromDonate").addEventListener("click", () => {
+      showPage("catalog");
+      history.replaceState(null, "", "#catalog");
+    });
+
+    document.querySelectorAll('[data-page-link="catalog"]').forEach(link => {
+      link.addEventListener("click", event => {
+        event.preventDefault();
+        showPage("catalog");
+        history.replaceState(null, "", "#catalog");
+      });
+    });
+    document.querySelectorAll('[data-page-link="donate"]').forEach(link => {
+      link.addEventListener("click", event => {
+        event.preventDefault();
+        showPage("donate");
+        history.replaceState(null, "", "#donate");
+      });
+    });
+
+    let selectedAmount = 5;
+    const amountButtons = document.querySelectorAll(".amount-option");
+    const customAmount = document.querySelector("#customAmount");
+    const paymentMethod = document.querySelector("#paymentMethod");
+
+    function updatePaymentAmount(amount) {
+      selectedAmount = Number(amount) || 0;
+      document.querySelector("#payButton").textContent = `Пожертвовать ${selectedAmount} р`;
+      document.querySelector("#donationSummary").textContent = `${selectedAmount} р на помощь питомцам`;
+      amountButtons.forEach(button => {
+        button.classList.toggle("active", Number(button.dataset.amount) === selectedAmount && !customAmount.value);
+      });
+      document.querySelector("#paymentSuccess").classList.remove("visible");
+    }
+
+    amountButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        customAmount.value = "";
+        updatePaymentAmount(button.dataset.amount);
+      });
+    });
+
+    customAmount.addEventListener("input", () => {
+      if (customAmount.value !== "") {
+        updatePaymentAmount(customAmount.value);
+        amountButtons.forEach(button => button.classList.remove("active"));
+      }
+    });
+
+    paymentMethod.addEventListener("change", () => {
+      document.querySelector("#cardFields").style.display = paymentMethod.value === "card" ? "block" : "none";
+      document.querySelector("#cardNumber").required = paymentMethod.value === "card";
+      document.querySelector("#cardExpiry").required = paymentMethod.value === "card";
+      document.querySelector("#cardCvc").required = paymentMethod.value === "card";
+    });
+    paymentMethod.dispatchEvent(new Event("change"));
+
+    document.querySelector("#cardNumber").addEventListener("input", event => {
+      const digits = event.target.value.replace(/\\D/g, "").slice(0, 16);
+      event.target.value = digits.replace(/(.{4})/g, "$1 ").trim();
+    });
+    document.querySelector("#cardExpiry").addEventListener("input", event => {
+      const digits = event.target.value.replace(/\\D/g, "").slice(0, 4);
+      event.target.value = digits.length > 2 ? digits.slice(0, 2) + "/" + digits.slice(2) : digits;
+    });
+
+    document.querySelector("#paymentForm").addEventListener("submit", event => {
+      event.preventDefault();
+      const amount = Number(customAmount.value || selectedAmount);
+      if (!Number.isFinite(amount) || amount < 1 || amount > 10000) {
+        alert("Укажите сумму от 1 до 10 000 р.");
+        return;
+      }
+      const name = document.querySelector("#donorName").value.trim();
+      const success = document.querySelector("#paymentSuccess");
+      success.textContent = `Спасибо, ${name}! Демонстрационный платёж на сумму ${amount} р успешно смоделирован. Деньги не списывались.`;
+      success.classList.add("visible");
+    });
+
+    // Открытие нужного раздела по ссылке при загрузке.
+    if (location.hash === "#donate") showPage("donate");
+    else if (location.hash.startsWith("#pet-")) {
+      const petName = decodeURIComponent(location.hash.slice(5));
+      if (pets.some(pet => pet.name === petName)) openPet(petName);
+      else showPage("catalog");
+    } else showPage("catalog");
+
+    render();
+  </script>
+</body>
+</html>
